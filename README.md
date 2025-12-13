@@ -323,31 +323,27 @@ await tracker.connect();
 Initiator (Tab A)                    Tracker                    Responder (Tab B)
      |                                  |                             |
      | 1. Connect to tracker            |                             |
-     |--announce (no offers)----------> |                             |
-     |                                  |                             |
-     | 2. Generate offer (every 30s)    |                             |
      |--announce (with offers)--------> |                             |
      |                                  |--announce-----------------> |
-     |                                  | 3. Relay offer to peers     |
-     |                                  | 4. Create responder Peer    |
-     |                                  | 5. Handle offer             |
-     |                                  | 6. Generate answer          |
+     |                                  | 2. Relay offer to peers     |
+     |                                  | 3. Create responder Peer    |
+     |                                  | 4. Handle offer             |
+     |                                  | 5. Generate answer          |
      |                                  |  <------------------answer--|
-     |  <----------------------answer-- |                             |
-     | 7. Receive answer                |                             |
-     | 8. Signal answer to Peer         |                             |
+     | 6. Receive answer                |                             |
+     | 7. Signal answer to Peer         |                             |
      |                                  |                             |
      |===== Peer WebRTC Connected ======|                             |
      |                                  |                             |
-     | 9. Create DataConnection         |                             |
+     | 8. Create DataConnection         |                             |
      |   (signal via Peer data channel) |                             |
-     |<----- DataConnection nego -----> |                             |
+     |<----------------- DataConnection negotiation ----------------> |
      |                                  |                             |
      |=====+ DataConnection Ready ======|                             |
      |                                  |                             |
-     | 10. Send application message     |                             |
+     | 9. Send application message      |                             |
      |--application-data-message------> |                             |
-     |                                  | 11. Receive message         |
+     |                                  | 10. Receive message         |
 ```
 
 ## Connection Model
