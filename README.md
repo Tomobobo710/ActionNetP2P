@@ -9,7 +9,7 @@ A lightweight, zero-dependency WebRTC-based peer-to-peer networking library. Use
 The library has three main layers:
 
 1. **Tracker Layer** - Peer discovery via WebSocket tracker
-2. **Peer Layer** - WebRTC signaling connections between peers (custom implementation, no external dependencies)
+2. **Peer Layer** - WebRTC signaling connections between peers
 3. **DataConnection Layer** - Application protocol on top of WebRTC data channels
 
 ## Library vs Application
@@ -32,7 +32,7 @@ See `example.html` for a complete example of how to build on top of this library
 
 ### ActionNetPeer (ActionNetPeer.js)
 
-A custom WebRTC peer connection wrapper that provides a simple interface for creating and managing connections.
+A WebRTC peer connection wrapper that provides a simple interface for creating and managing connections.
 
 **Constructor:**
 ```javascript
@@ -376,7 +376,7 @@ The library uses a **two-phase connection** to separate peer discovery from appl
 
 **Deterministic Peer Selection:**
 - DataConnection initiator always selected based on peer ID comparison (lexicographically highest initiates)
-- Guarantees both sides agree on who initiates, preventing simultaneous offer race conditions
+- Guarantees both sides agree on who initiates, preventing simultaneous offers
 
 **Complete ICE Gathering:**
 - ActionNetPeer waits for ICE gathering to complete before emitting offer/answer
@@ -473,9 +473,6 @@ const tracker = new ActionNetTrackerClient(trackerUrls, infohash, peerId, {
     ]
 });
 ```
-
-**Self-Hosting TURN (Coturn):**
-For production deployments, run your own TURN server using [Coturn](https://github.com/coturn/coturn) for complete control and zero relay costs.
 
 ## Testing
 
