@@ -2,6 +2,8 @@
 
 A lightweight, zero-dependency WebRTC-based peer-to-peer networking library. Uses WebSocket trackers for peer discovery, built on BitTorrent infrastructure (infohash + tracker protocol).
 
+<img width="3002" height="1757" alt="image" src="https://github.com/user-attachments/assets/886ed373-bb7a-482e-b74c-2d8759d6370e" />
+
 ## Architecture Overview
 
 The library has three main layers:
