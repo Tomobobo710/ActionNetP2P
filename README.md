@@ -9,8 +9,8 @@ A lightweight, zero-dependency WebRTC-based peer-to-peer networking library. Use
 The library has three main layers:
 
 1. **Tracker Layer** - Peer discovery via WebSocket tracker
-2. **Peer Layer** - WebRTC signaling connections between peers
-3. **DataConnection Layer** - Application protocol on top of WebRTC data channels
+2. **ActionNetPeer Layer** - WebRTC signaling connections between peers
+3. **DataConnection Layer** - Application protocol through WebRTC data channels
 
 ## Library vs Application
 
@@ -336,10 +336,9 @@ Initiator (Tab A)                    Tracker                    Responder (Tab B
      |===== Peer WebRTC Connected ======|                             |
      |                                  |                             |
      | 8. Create DataConnection         |                             |
-     |   (signal via Peer data channel) |                             |
-     |<----------------- DataConnection negotiation ----------------> |
+     | <---------------- DataConnection negotiation ----------------> |
      |                                  |                             |
-     |=====+ DataConnection Ready ======|                             |
+     |====== DataConnection Ready ======|                             |
      |                                  |                             |
      | 9. Send application message      |                             |
      |--application-data-message------> |                             |
