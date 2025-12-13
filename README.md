@@ -70,7 +70,7 @@ Handles peer discovery through a WebSocket tracker server and manages ActionNetP
 ```javascript
 const tracker = new ActionNetTrackerClient(
     ['wss://tracker.openwebtorrent.com/', 'wss://tracker.btorrent.xyz/'],  // URL or array of URLs
-    infohash,                              // SHA-1 hash of game ID
+    infohash,                              // SHA-1 hash of application ID
     peerId,                                // Random peer identifier
     {
         numwant: 50,                       // Max peers to request
@@ -95,7 +95,7 @@ const tracker = new ActionNetTrackerClient(
 **Events:**
 - `ready` - First peer ready, starts announcing with offers
 - `peer` - Successfully connected to peer: `{ id: peerId, peer: ActionNetPeer instance, source: 'tracker' }`
-- `connection` - DataConnection (game protocol layer) ready: DataConnection instance with `localPeerId` and `remotePeerId` exposed
+- `connection` - DataConnection (application protocol layer) ready: DataConnection instance with `localPeerId` and `remotePeerId` exposed
 - `peer-disconnected` - ActionNetPeer connection closed: `{ id: peerId }`
 - `peer-failed` - ActionNetPeer connection failed: `{ id: peerId, error: Error }`
 - `update` - Tracker sent stats: `{ complete: seeders, incomplete: leechers }`
@@ -117,10 +117,10 @@ const tracker = new ActionNetTrackerClient(
 
 ### DataConnection (DataConnection.js)
 
-Game protocol layer that creates a second WebRTC connection for application data.
+Application protocol layer that creates a second WebRTC connection for application data.
 
 **Purpose:**
-Uses a connected ActionNetPeer instance as a signaling channel to establish a second WebRTC peer connection. This provides clean separation between peer discovery (ActionNetPeer) and game communication (DataConnection).
+Uses a connected ActionNetPeer instance as a signaling channel to establish a second WebRTC peer connection. This provides clean separation between peer discovery (ActionNetPeer) and application communication (DataConnection).
 
 **Constructor:**
 ```javascript
@@ -143,7 +143,7 @@ const connection = new DataConnection(signalingPeer, {
 - `{ type: 'channel-answer', sdp: '...' }` - WebRTC answer
 - `{ type: 'channel-ice-candidate', candidate: {...} }` - ICE candidate
 
-**Game Messages (sent through DataConnection's data channel):**
+**Application Messages (sent through DataConnection's data channel):**
 
 DataConnection automatically serializes/deserializes JSON. Send objects, receive parsed objects:
 
@@ -194,13 +194,13 @@ connection.on('data', (message) => {
 ```
 
 **Events:**
-- `connect` - Game data channel established
-- `data` - Received message on game data channel (already parsed JSON)
+- `connect` - Application data channel established
+- `data` - Received message on application data channel (already parsed JSON)
 - `close` - Data channel closed
 - `error` - Connection error
 
 **Methods:**
-- `send(message)` - Send JSON object through game data channel (auto-stringified, returns boolean)
+- `send(message)` - Send JSON object through application data channel (auto-stringified, returns boolean)
 - `close()` - Clean up and close connection
 - `on(event, handler)` - Register event listener
 
@@ -212,7 +212,7 @@ connection.on('data', (message) => {
 ```javascript
 {
     action: "announce",
-    info_hash: "sha1_of_game_id",
+    info_hash: "sha1_of_application_id",
     peer_id: "peer_xyz",
     port: 6881,
     numwant: 50,
@@ -322,38 +322,37 @@ await tracker.connect();
 ```
 Initiator (Tab A)                    Tracker                    Responder (Tab B)
      |                                  |                             |
-     | 1. Connect to tracker             |                             |
-     |--announce (no offers)----------->|                             |
+     | 1. Connect to tracker            |                             |
+     |--announce (no offers)----------> |                             |
      |                                  |                             |
      | 2. Generate offer (every 30s)    |                             |
-     |--announce (with offers)--------->|                             |
-     |                                  | 3. Relay offer to peers    |
-     |                                  |--------------------------->|
-     |                                  |                             |
-     |                                  |       4. Create responder Peer
-     |                                  |       5. Handle offer
-     |                                  |       6. Generate answer
-     |                                  |<--answer------------------|
+     |--announce (with offers)--------> |                             |
+     |                                  |--announce-----------------> |
+     |                                  | 3. Relay offer to peers     |
+     |                                  | 4. Create responder Peer    |
+     |                                  | 5. Handle offer             |
+     |                                  | 6. Generate answer          |
+     |                                  |  <------------------answer--|
+     |  <----------------------answer-- |                             |
      | 7. Receive answer                |                             |
-     |<--answer---------------------|  |                             |
      | 8. Signal answer to Peer         |                             |
      |                                  |                             |
-     |===== Peer WebRTC Connected =====|                             |
+     |===== Peer WebRTC Connected ======|                             |
      |                                  |                             |
      | 9. Create DataConnection         |                             |
-     |     (signal via Peer data channel)                             |
-     |<------ DataConnection nego ------->|                             |
+     |   (signal via Peer data channel) |                             |
+     |<----- DataConnection nego -----> |                             |
      |                                  |                             |
-     |===== DataConnection Ready ======|                             |
+     |=====+ DataConnection Ready ======|                             |
      |                                  |                             |
-     | 10. Send game message            |                             |
-     |-----game-data-message--------->|                             |
-     |                          11. Receive message
+     | 10. Send application message     |                             |
+     |--application-data-message------> |                             |
+     |                                  | 11. Receive message         |
 ```
 
 ## Connection Model
 
-The library uses a **two-phase connection** to separate peer discovery from game communication:
+The library uses a **two-phase connection** to separate peer discovery from application communication:
 
 1. **Discovery Phase (ActionNetPeer)**: 
    - TrackerClient announces offers to tracker
@@ -361,19 +360,19 @@ The library uses a **two-phase connection** to separate peer discovery from game
    - Peers exchange answer through tracker
    - Result: One RTCPeerConnection per peer (used for signaling only)
 
-2. **Game Phase (DataConnection)**:
+2. **Application Phase (DataConnection)**:
    - DataConnection creates a second RTCPeerConnection on top of the first
    - Offer/answer negotiated through the signaling ActionNetPeer's data channel
-   - Result: Isolated game data channel completely separate from signaling
+   - Result: Isolated application data channel completely separate from signaling
    - No need to layer additional protocols—DataConnection handles everything
 
-**Why two phases?** It provides clean separation: signaling is automatic and transparent, game data is isolated and can be replaced/upgraded independently.
+**Why two phases?** It provides clean separation: signaling is automatic and transparent, application data is isolated and can be replaced/upgraded independently.
 
 ## Key Design Decisions
 
 **Two-Phase Connection:**
 - Phase 1 (ActionNetPeer): WebRTC signaling for peer discovery, handled by tracker
-- Phase 2 (DataConnection): WebRTC data channel for game messages, negotiated through signaling peer
+- Phase 2 (DataConnection): WebRTC data channel for application messages, negotiated through signaling peer
 
 **Deterministic Peer Selection:**
 - DataConnection initiator always selected based on peer ID comparison (lexicographically highest initiates)
@@ -417,11 +416,11 @@ The library uses a **two-phase connection** to separate peer discovery from game
 
 **Infohash Generation:**
 
-The infohash is derived from the game ID using a cryptographic hash. The example uses SHA-1, but SHA-256 or any consistent hash works. **Important:** All peers must use the same hash function to generate the same infohash for discovery.
+The infohash is derived from the application ID using a cryptographic hash. The example uses SHA-1, but SHA-256 or any consistent hash works. **Important:** All peers must use the same hash function to generate the same infohash for discovery.
 
 ```javascript
 // SHA-1 (example.html approach)
-const hashBuffer = await crypto.subtle.digest('SHA-1', gameIdBytes);
+const hashBuffer = await crypto.subtle.digest('SHA-1', applicationIdBytes);
 ```
 
 ## NAT Traversal: STUN and TURN
@@ -480,7 +479,7 @@ For production deployments, run your own TURN server using [Coturn](https://gith
 
 ## Testing
 
-Open `example.html` in two browser tabs with the same game ID (or create a test app):
+Open `example.html` in two browser tabs with the same application ID (or create a test app):
 
 1. Both peers connect to tracker
 2. First peer announces an offer
