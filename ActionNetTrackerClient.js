@@ -15,10 +15,12 @@ class ActionNetTrackerClient {
             port: options.port || 6881,
             numwant: options.numwant || 50,
             announceInterval: options.announceInterval || 30000,
+            maxAnnounceInterval: options.maxAnnounceInterval || 120000,
+            backoffMultiplier: options.backoffMultiplier || 1.1,
             ...options
         };
 
-        this.trackers = new Map(); // trackerUrl -> { ws, announceInterval }
+        this.trackers = new Map(); // trackerUrl -> { ws, announceInterval, currentInterval, announceCount }
         this.discoveredPeerIds = new Set();
         this.handlers = new Map();
         this.messageCount = 0;
@@ -26,6 +28,7 @@ class ActionNetTrackerClient {
         this.pendingOffers = new Set(); // offerId of offers waiting for answers
         this.connectedPeerIds = new Set(); // peerId of peers we've successfully connected to
         this.discoveredCount = 0; // Total peers from tracker (seeders + leechers)
+        this.announceCount = 0; // Track total announces for backoff
     }
 
     /**
@@ -96,7 +99,7 @@ class ActionNetTrackerClient {
                 };
 
                 // Store tracker connection
-                this.trackers.set(trackerUrl, { ws, announceInterval: null });
+                this.trackers.set(trackerUrl, { ws, announceInterval: null, currentInterval: this.options.announceInterval, announceCount: 0 });
 
                 // Timeout for connection
                 setTimeout(() => {
@@ -222,14 +225,29 @@ class ActionNetTrackerClient {
         // Announce immediately with offers (first peer is ready)
         this.announceWithOffers();
 
-        // Then announce with offers at specified interval (default: 30 seconds) to all trackers
+        // Then announce with offers at specified interval with backoff to all trackers
         for (const [trackerUrl, trackerData] of this.trackers) {
             if (trackerData.announceInterval) clearInterval(trackerData.announceInterval);
-            trackerData.announceInterval = setInterval(() => {
-                if (trackerData.ws && trackerData.ws.readyState === WebSocket.OPEN) {
-                    this.announceWithOffers(trackerData.ws);
-                }
-            }, this.options.announceInterval);
+            
+            const scheduleNextAnnounce = () => {
+                trackerData.announceInterval = setTimeout(() => {
+                    if (trackerData.ws && trackerData.ws.readyState === WebSocket.OPEN) {
+                        trackerData.announceCount++;
+                        this.announceWithOffers(trackerData.ws);
+                        
+                        // Increase interval by backoff multiplier, cap at maxAnnounceInterval
+                        trackerData.currentInterval = Math.min(
+                            trackerData.currentInterval * this.options.backoffMultiplier,
+                            this.options.maxAnnounceInterval
+                        );
+                        
+                        // Schedule next announce with new interval
+                        scheduleNextAnnounce();
+                    }
+                }, trackerData.currentInterval);
+            };
+            
+            scheduleNextAnnounce();
         }
     }
 

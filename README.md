@@ -403,8 +403,18 @@ The library uses a **two-phase connection** to separate peer discovery from appl
 **ActionNetTrackerClient:**
 - `port` - Local port number (default: 6881)
 - `numwant` - Maximum peers to request from tracker (default: 50)
-- `announceInterval` - Time between periodic announces in milliseconds (default: 30000)
+- `announceInterval` - Initial time between announces in milliseconds (default: 5000)
+- `maxAnnounceInterval` - Maximum interval cap in milliseconds (default: 120000)
+- `backoffMultiplier` - Multiply interval by this after each announce (default: 1.1)
 - `iceServers` - Array of STUN/TURN server configurations
+
+**Announce Backoff Strategy:**
+
+After each announce, the interval is multiplied by `backoffMultiplier` until reaching `maxAnnounceInterval`. With default settings (`announceInterval: 5000`, `backoffMultiplier: 1.1`, `maxAnnounceInterval: 120000`):
+
+- 5s → 5.5s → 6s → 6.6s → 7.3s → 8s → 8.8s → 9.7s → 10.7s → 11.7s → 12.9s → 14.2s → 15.6s → 17.2s → 18.9s → 20.8s → 22.9s → 25.2s → 27.7s → 30.5s ... → 120s (capped after ~36 announces)
+
+Higher multipliers (e.g., 1.5) reach the cap faster: 5s → 7.5s → 11s → 17s → 26s → 39s → 59s → 88s → 120s (capped).
 
 **DataConnection:**
 - No configuration; automatically uses STUN servers for ICE

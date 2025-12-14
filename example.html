@@ -322,7 +322,9 @@
                 ];
                 const tracker = new ActionNetTrackerClient(trackerUrls, infohash, localPeerId, {
                     numwant: 50,
-                    announceInterval: 5000  // 5 seconds for testing (default is 30000)
+                    announceInterval: 5000,        // Start at 5 seconds for fast discovery
+                    maxAnnounceInterval: 120000,   // Back off to max 120 seconds
+                    backoffMultiplier: 1.1         // Increase by 1.1x each cycle
                 });
 
                 // Handle peer connections
