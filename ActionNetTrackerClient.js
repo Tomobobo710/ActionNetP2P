@@ -12,6 +12,7 @@ class ActionNetTrackerClient {
         this.infohash = infohash;
         this.peerId = peerId;
         this.options = {
+            debug: options.debug || false,
             numwant: options.numwant || 50,
             announceInterval: options.announceInterval || 5000,
             maxAnnounceInterval: options.maxAnnounceInterval || 120000,
@@ -617,6 +618,7 @@ class ActionNetTrackerClient {
      * Logging
      */
     log(msg, level = 'info') {
+        if (!this.options.debug) return;
         console.log(`[TrackerClient] ${msg}`);
     }
 }

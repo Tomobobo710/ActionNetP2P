@@ -400,6 +400,7 @@ The library uses a **two-phase connection** to separate peer discovery from appl
 - `iceServers` - Array of STUN/TURN server configurations
 
 **ActionNetTrackerClient:**
+- `debug` - Enable logging for debugging (default: false)
 - `numwant` - Maximum peers to request from tracker (default: 50)
 - `announceInterval` - Initial time between announces in milliseconds (default: 5000)
 - `maxAnnounceInterval` - Maximum interval cap in milliseconds (default: 120000)

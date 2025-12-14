@@ -321,7 +321,8 @@
                     'wss://tracker.fastcast.nz/'
                 ];
                 const tracker = new ActionNetTrackerClient(trackerUrls, infohash, localPeerId, {
-                    numwant: 50,
+                    debug: true,                   // Enable logging for debugging
+                    numwant: 50,                   // Max peers to request from tracker
                     announceInterval: 5000,        // Start at 5 seconds for fast discovery
                     maxAnnounceInterval: 120000,   // Back off to max 120 seconds
                     backoffMultiplier: 1.1         // Increase by 1.1x each cycle
