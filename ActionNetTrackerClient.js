@@ -14,7 +14,7 @@ class ActionNetTrackerClient {
         this.options = {
             port: options.port || 6881,
             numwant: options.numwant || 50,
-            announceInterval: options.announceInterval || 30000,
+            announceInterval: options.announceInterval || 5000,
             maxAnnounceInterval: options.maxAnnounceInterval || 120000,
             backoffMultiplier: options.backoffMultiplier || 1.1,
             ...options
