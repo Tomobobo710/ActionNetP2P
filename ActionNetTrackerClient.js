@@ -12,7 +12,6 @@ class ActionNetTrackerClient {
         this.infohash = infohash;
         this.peerId = peerId;
         this.options = {
-            port: options.port || 6881,
             numwant: options.numwant || 50,
             announceInterval: options.announceInterval || 5000,
             maxAnnounceInterval: options.maxAnnounceInterval || 120000,
@@ -296,7 +295,6 @@ class ActionNetTrackerClient {
             action: 'announce',
             info_hash: this.infohash,
             peer_id: this.peerId,
-            port: this.options.port,
             numwant: this.options.numwant
         };
 

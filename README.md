@@ -74,8 +74,7 @@ const tracker = new ActionNetTrackerClient(
     peerId,                                // Random peer identifier
     {
         numwant: 50,                       // Max peers to request
-        announceInterval: 30000,           // Milliseconds between announces
-        port: 6881,
+        announceInterval: 5000,            // Milliseconds between announces
         iceServers: [...]                  // Optional STUN/TURN servers
     }
 );
@@ -263,7 +262,7 @@ const tracker = new ActionNetTrackerClient(
     ['wss://tracker.openwebtorrent.com/', 'wss://tracker.btorrent.xyz/'],
     infohash,
     peerId,
-    { numwant: 50, announceInterval: 30000 }
+    { numwant: 50 }
 );
 
 // Tracker is ready (first peer prepared, will start announcing)
@@ -401,7 +400,6 @@ The library uses a **two-phase connection** to separate peer discovery from appl
 - `iceServers` - Array of STUN/TURN server configurations
 
 **ActionNetTrackerClient:**
-- `port` - Local port number (default: 6881)
 - `numwant` - Maximum peers to request from tracker (default: 50)
 - `announceInterval` - Initial time between announces in milliseconds (default: 5000)
 - `maxAnnounceInterval` - Maximum interval cap in milliseconds (default: 120000)
