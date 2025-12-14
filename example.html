@@ -495,25 +495,6 @@
             log('Left game', 'info');
         };
 
-        // Verify scripts loaded
-         setTimeout(() => {
-             let missing = [];
-             if (typeof ActionNetPeer === 'undefined') missing.push('ActionNetPeer.js');
-             if (typeof ActionNetTrackerClient === 'undefined') missing.push('ActionNetTrackerClient.js');
-             if (typeof DataConnection === 'undefined') missing.push('DataConnection.js');
-
-            if (missing.length > 0) {
-                log(`❌ Missing scripts: ${missing.join(', ')}`, 'error');
-                document.getElementById('status').textContent = `Failed to load: ${missing.join(', ')}`;
-                document.getElementById('status').parentElement.className = 'status error';
-                document.getElementById('joinBtn').disabled = true;
-            } else {
-                log('✓ All modules loaded', 'info');
-                document.getElementById('status').textContent = 'Ready to join game';
-                log('Click "Join Game" to start testing', 'info');
-            }
-        }, 100);
-
         log('P2P Test harness initializing...', 'info');
     </script>
 </body>
