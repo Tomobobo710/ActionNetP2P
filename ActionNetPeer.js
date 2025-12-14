@@ -168,8 +168,9 @@ class ActionNetPeer {
         } else if (data.candidate) {
             // ICE candidate
             this.pc.addIceCandidate(new RTCIceCandidate(data.candidate))
-                .catch(() => {
-                    // Ignore ICE candidate errors - they can arrive out of order
+                .catch((e) => {
+                    // ICE errors are non-fatal (candidates arrive out of order)
+                    console.debug('[Peer] ICE candidate error (non-fatal):', e.message);
                 });
         }
     }

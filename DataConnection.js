@@ -78,7 +78,7 @@ class DataConnection {
                     this.emit('data', message);
                 }
             } catch (e) {
-                // Ignore parsing errors
+                console.warn('[DataConnection] Failed to parse signaling message:', e.message);
             }
         };
 
@@ -160,7 +160,8 @@ class DataConnection {
                 try {
                     await this.pc.addIceCandidate(new RTCIceCandidate(message.candidate));
                 } catch (e) {
-                    // ICE errors are non-fatal
+                    // ICE errors are non-fatal (candidates arrive out of order)
+                    console.debug('[DataConnection] ICE candidate error (non-fatal):', e.message);
                 }
             }
         } catch (e) {
