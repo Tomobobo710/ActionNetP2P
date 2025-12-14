@@ -436,6 +436,9 @@ class ActionNetTrackerClient {
                 remotePeerId: peerId
             });
             
+            // Emit connection after DataConnection is fully negotiated and ready
+            // At this point, the ActionNetPeer signaling phase is complete and the
+            // application data channel is connected. Send handshakes here to validate peers.
             this.emit('connection', connection);
         });
 
@@ -504,6 +507,9 @@ class ActionNetTrackerClient {
                     remotePeerId: peerId
                 });
                 
+                // Emit connection after DataConnection is fully negotiated and ready
+                // At this point, the ActionNetPeer signaling phase is complete and the
+                // application data channel is connected. Send handshakes here to validate peers.
                 this.emit('connection', connection);
                 // Keep the peer in the map so it stays alive
             });
