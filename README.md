@@ -376,7 +376,6 @@ The library handles peer discovery and provides a ready-to-use communication cha
 **One RTCPeerConnection Per Peer:**
 - DataConnection wraps a single RTCPeerConnection for all peer-to-peer communication
 - Handles both tracker signaling and application messaging through the same connection
-- Simple and efficient
 
 **Deterministic Initiator Selection:**
 - DataConnection initiator selected based on peer ID comparison (lexicographically highest initiates)
